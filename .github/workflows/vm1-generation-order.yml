@@ -1,0 +1,30 @@
+name: VM1 generation order probe
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: probe mode
+        required: true
+        type: choice
+        options:
+          - slow-success
+          - fast-fail
+jobs:
+  probe:
+    name: vm1-generation-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Controlled generation discriminator
+        shell: bash
+        run: |
+          echo "MODE=${{ inputs.mode }}"
+          echo "HEAD_SHA=${{ github.sha }}"
+          if [ "${{ inputs.mode }}" = "slow-success" ]; then
+            sleep 75
+            echo "GENERATION_A_LATE_SUCCESS"
+            exit 0
+          fi
+          sleep 5
+          echo "GENERATION_B_EARLY_FAILURE"
+          exit 1
